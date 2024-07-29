@@ -1,0 +1,146 @@
+{
+  "gender": [
+    "male",
+    "female",
+    "male",
+    "female"
+  ],
+  "age": [
+    25,
+    30,
+    45,
+    35
+  ],
+  "height_cm": [
+    183,
+    165,
+    175,
+    160
+  ],
+  "weight_kg": [
+    72,
+    55,
+    80,
+    70
+  ],
+  "average_sleep_hours": [
+    7,
+    8,
+    6,
+    7
+  ],
+  "daily_water_intake_litres": [
+    2,
+    3,
+    2.5,
+    2
+  ],
+  "steps_count_per_day": [
+    3000,
+    5000,
+    10000,
+    7000
+  ],
+  "daily_exercise_minutes": [
+    60,
+    30,
+    45,
+    60
+  ],
+  "work_hours": [
+    8.5,
+    9,
+    10,
+    8
+  ],
+  "systolic_pressure": [
+    110,
+    120,
+    130,
+    115
+  ],
+  "diastolic_pressure": [
+    75,
+    80,
+    85,
+    78
+  ],
+  "heart_rate_bpm": [
+    65,
+    70,
+    75,
+    68
+  ],
+  "blood_sugar_levels_mg_dl": [
+    80,
+    90,
+    100,
+    85
+  ],
+  "medical_history": [
+    "anxiety",
+    "none",
+    "hypertension",
+    "none"
+  ],
+  "heredity_diseases": [
+    "mentalIllness",
+    "none",
+    "heartDisease",
+    "diabetes"
+  ],
+  "smoking_status": [
+    "never",
+    "never",
+    "former",
+    "never"
+  ],
+  "alcohol_consumption": [
+    "occasional",
+    "never",
+    "regular",
+    "occasional"
+  ],
+  "physical_activity_level": [
+    "lightlyActive",
+    "moderatelyActive",
+    "active",
+    "lightlyActive"
+  ],
+  "diet_type": [
+    "vegetarian",
+    "nonVegetarian",
+    "vegetarian",
+    "vegetarian"
+  ],
+  "stress_level": [
+    "moderate",
+    "low",
+    "high",
+    "moderate"
+  ],
+  "current_medications": [
+    "none",
+    "none",
+    "antihypertensives",
+    "none"
+  ],
+  "frequency_of_checkups": [
+    "rarely",
+    "often",
+    "regularly",
+    "rarely"
+  ],
+  "type_of_physical_activities": [
+    "weightlifting",
+    "running",
+    "cycling",
+    "weightlifting"
+  ],
+  "health_outcome": [
+    "good",
+    "good",
+    "poor",
+    "good"
+  ]
+}
