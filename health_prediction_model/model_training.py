@@ -24,7 +24,7 @@ def train_model():
 
     model.fit(X_train, y_train)
 
-    joblib.dump(model, 'health_prediction/models/health_model.pkl')
+    joblib.dump(model, 'health_prediction_model/models/health_model.pkl')
     print("Model training completed and saved as 'health_model.pkl'.")
 
 

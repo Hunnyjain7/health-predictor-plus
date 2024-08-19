@@ -13,11 +13,11 @@ def read_json(file_path):
         return json.load(f)
 
 
-def get_training_data(training_json_path="health_prediction/training_data.json"):
+def get_training_data(training_json_path="health_prediction_model/training_data.json"):
     return read_json(training_json_path)
 
 
-def read_config(config_path="health_prediction/config.json"):
+def read_config(config_path="health_prediction_model/config.json"):
     return read_json(config_path)
 
 

@@ -1,18 +1,19 @@
+import io
 import json
+import os
+import PyPDF2
+import uuid
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from redis import Redis
+from dotenv import load_dotenv
 from langchain import PromptTemplate, LLMChain
 from langchain.chat_models import ChatOpenAI
-import PyPDF2
-import io
-import os
-import uuid
-from dotenv import load_dotenv
 
-from health_prediction.make_prediction import make_prediction
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from redis import Redis
+from health_prediction_model.make_prediction import make_prediction
 from schema import HealthRecord
 
 # Load environment variables from .env file
@@ -38,10 +39,10 @@ redis_client = Redis(host='localhost', port=6379, db=0)
 
 # Set up OpenAI key and model
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-llm = ChatOpenAI(model="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
-# llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(model="gpt-4o", api_key=OPENAI_API_KEY)
 
-template = """You are a helpful assistant. Answer the question based on the given context.
+template = """You are a helpful Health Predictor assistant, an advanced AI designed to provide detailed health prediction. 
+Answer the question based on the given context.
 
 Context: {context}
 
@@ -64,7 +65,7 @@ def extract_text_from_pdf(file):
 
 
 def answer_query(query, context):
-    response = chain({"context": context, "question": query})
+    response = chain({"context": context[-15000:], "question": query})
     return response['text']
 
 
@@ -83,6 +84,7 @@ async def upload_report(file: UploadFile = File(...)):
     content = await file.read()
     file_like_object = io.BytesIO(content)
     text = extract_text_from_pdf(file_like_object)
+    print("text", text)
     text = f"**User's provided Report:**\n{text}"
 
     # Generate a unique user session ID
@@ -138,11 +140,6 @@ async def report_analysis(session_id: str):
     context = context.decode('utf-8')
 
     # TODO update the best prompt which can work for our report analysis
-    # query = """
-    # Analyze the health report of user and summarize the key health concerns.
-    # Based on the health report, what potential future ailments could be faced?
-    # Recommend an exercise routine and a diet plan to improve overall health.
-    # """
 
     query = """
     Analyze the health report and provide a detailed summary of the key health concerns.
@@ -151,7 +148,7 @@ async def report_analysis(session_id: str):
     
     1. **Health Report Analysis:**
     - Thoroughly analyze the uploaded health report of the user.
-    - If the uploaded report is not related to health, inform the user that the provided report is not related to health and request a proper health report.
+    - If the uploaded report is not related to health, inform the user that the provided report is not related to health and request a valid health report.
     - Summarize the key health metrics and identify any abnormal values or areas of concern.
     - Highlight any diagnosed conditions or notable medical history.
     - Do not mention any user uploaded report kind of the content in the response, just provide the analysis of the health report.
@@ -214,27 +211,26 @@ def create_health_record(record: HealthRecord):
     # Todo: discuss and decide the output format of the response and provide the format instructions
     #  that can be followed by openai in the the below query/prompt
 
-    # query = """
-    # Based on this health record, predict potential future ailments and provide preventive measures like diet plans or
-    # exercise routines.
-    # """
+    prediction_line = f"""- Prediction obtained from the trained model is {prediction}.
+    - Analyze the user's provided information to determine if the prediction made by the trained model is accurate, 
+    if it's not accurate then just ignore it.""" if prediction is not None else ""
+
+    title_line = f""" - Create a title that incorporates the prediction (e.g., "Your health seems to be {prediction}") only if it aligns
+     with the analysis. If it does not align, use a general title such as 
+     "Comprehensive Health Prediction Report for [full_name]".""" if (
+        prediction is not None
+    ) else 'Create a title such as "Comprehensive Health Prediction Report for [full_name]"'
 
     query = f"""
     Based on the user's provided information, generate a comprehensive health prediction report that includes:
     
     **Instructions to follow strictly:**
-    - Prediction obtained from the trained model is {prediction}.
-    - Analyze the user's provided information to determine if the prediction made by the model is accurate.
-    - If the prediction is accurate, seamlessly incorporate it into the title of the health report without mentioning 
-    that it was derived from a model.
-    - If the prediction is not accurate or not desirable, do not include it in the health report.
-    - Additionally, do not consider the trained model's prediction in your analysis when writing the health prediction 
-    report, and do not mention anything that indicates a trained model was used in the background.
-    
+    {prediction_line}
+    - Do not use the words like trained model, AI, or machine learning in the prediction.
+    - If any information is missing or not provided by the user, then do not include it in the health report.
+
     ### Title Creation:
-    - Create a title that incorporates the prediction (e.g., "Your health seems to be {prediction}") only if it aligns
-     with the analysis. If it does not align, use a general title such as 
-     "Comprehensive Health Prediction Report for [full_name]".
+    {title_line}
     - You can improvise here as per the provided instructions.
 
     1. Key Health Metrics:
@@ -244,6 +240,7 @@ def create_health_record(record: HealthRecord):
        - Blood Sugar Levels
     
     2. Predicted Health Risks:
+       *Note*: Include only the predictions that align with the user's health metrics and information and do not include the trained model's prediction.
        - List potential future health conditions with their probabilities.
        - Provide reasons for each predicted condition.
     

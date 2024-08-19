@@ -1,4 +1,0 @@
-{
-  "health_model_path": "health_prediction/models/health_model.pkl",
-  "preprocessor_model_path": "health_prediction/models/preprocessor.pkl"
-}
