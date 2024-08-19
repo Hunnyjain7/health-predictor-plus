@@ -1,5 +1,3 @@
-# HealthPredictor Plus
-
 Predictive Health Analysis Using Artificial Intelligence and Machine Learning
 
 ## Understanding the problem
