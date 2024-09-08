@@ -1,7 +1,8 @@
+import joblib
+
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
-import joblib
 
 from data_preprocessing import preprocess_data
 from utils import load_data, get_training_data
@@ -15,7 +16,6 @@ def train_model():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     # Fit the preprocessor on your training data
     preprocessor.fit(X_train)
-    
 
     model = Pipeline(steps=[
         ('preprocessor', preprocessor),

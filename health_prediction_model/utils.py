@@ -14,7 +14,14 @@ def read_json(file_path):
 
 
 def get_training_data(training_json_path="health_prediction_model/training_data.json"):
-    return read_json(training_json_path)
+    # Save DataFrame to CSV
+    csv_filename = 'health_prediction_model/health_data.csv'
+
+    # Load CSV back into JSON
+    df_loaded = pd.read_csv(csv_filename)
+    json_data_loaded = df_loaded.to_dict(orient='list')
+    # return read_json(training_json_path)
+    return json_data_loaded
 
 
 def read_config(config_path="health_prediction_model/config.json"):

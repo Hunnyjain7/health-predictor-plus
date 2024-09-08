@@ -5,14 +5,16 @@ import PyPDF2
 import uuid
 
 from dotenv import load_dotenv
-from langchain import PromptTemplate, LLMChain
-from langchain.chat_models import ChatOpenAI
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from langchain import PromptTemplate, LLMChain
+from langchain.chat_models import ChatOpenAI
+
 from redis import Redis
+
 from health_prediction_model.make_prediction import make_prediction
 from schema import HealthRecord
 
@@ -32,7 +34,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # Set up Redis client
 redis_client = Redis(host='localhost', port=6379, db=0)
@@ -106,6 +107,7 @@ async def ask_question(query: str, session_id: str):
     - **query**: The question you want to ask.
     - **session_id**: The session ID received after uploading the report.
     """
+
     # Retrieve the context from Redis using the session ID
     context = redis_client.get(session_id)
     if context is None:
@@ -139,8 +141,6 @@ async def report_analysis(session_id: str):
 
     context = context.decode('utf-8')
 
-    # TODO update the best prompt which can work for our report analysis
-
     query = """
     Analyze the health report and provide a detailed summary of the key health concerns.
 
@@ -148,10 +148,12 @@ async def report_analysis(session_id: str):
     
     1. **Health Report Analysis:**
     - Thoroughly analyze the uploaded health report of the user.
-    - If the uploaded report is not related to health, inform the user that the provided report is not related to health and request a valid health report.
+    - If the uploaded report is not related to health, inform the user that the provided report is not related to health
+     and request a valid health report.
     - Summarize the key health metrics and identify any abnormal values or areas of concern.
     - Highlight any diagnosed conditions or notable medical history.
-    - Do not mention any user uploaded report kind of the content in the response, just provide the analysis of the health report.
+    - Do not mention any user uploaded report kind of the content in the response, just provide the analysis of the 
+    health report.
 
     2. **Predicted Future Ailments:**
     - Based on the health report, identify potential future health risks or ailments the user might face.
@@ -170,7 +172,8 @@ async def report_analysis(session_id: str):
     - Suggest additional lifestyle changes or preventive measures that can help maintain or improve the user's health.
     - Include tips on stress management, sleep hygiene, and regular health monitoring.
 
-    Ensure the language is simple and easy to understand, avoiding complex medical jargon. The recommendations should be practical, actionable, and personalized to the user's health status.
+    Ensure the language is simple and easy to understand, avoiding complex medical jargon. The recommendations should be
+     practical, actionable, and personalized to the user's health status.
     """
 
     response = answer_query(query, context)
@@ -208,17 +211,14 @@ def create_health_record(record: HealthRecord):
         traceback.print_exc()
         print("error", e)
 
-    # Todo: discuss and decide the output format of the response and provide the format instructions
-    #  that can be followed by openai in the the below query/prompt
-
     prediction_line = f"""- Prediction obtained from the trained model is {prediction}.
     - Analyze the user's provided information to determine if the prediction made by the trained model is accurate, 
     if it's not accurate then just ignore it.""" if prediction is not None else ""
 
-    title_line = f""" - Create a title that incorporates the prediction (e.g., "Your health seems to be {prediction}") only if it aligns
-     with the analysis. If it does not align, use a general title such as 
+    title_line = f""" - Create a title that incorporates the prediction (e.g., "Your health seems to be {prediction}")
+     only if it aligns with the analysis. If it does not align, use a general title such as 
      "Comprehensive Health Prediction Report for [full_name]".""" if (
-        prediction is not None
+            prediction is not None
     ) else 'Create a title such as "Comprehensive Health Prediction Report for [full_name]"'
 
     query = f"""
@@ -240,7 +240,8 @@ def create_health_record(record: HealthRecord):
        - Blood Sugar Levels
     
     2. Predicted Health Risks:
-       *Note*: Include only the predictions that align with the user's health metrics and information and do not include the trained model's prediction.
+       *Note*: Include only the predictions that align with the user's health metrics and information and do not include
+        the trained model's prediction.
        - List potential future health conditions with their probabilities.
        - Provide reasons for each predicted condition.
     
@@ -259,7 +260,8 @@ def create_health_record(record: HealthRecord):
     
     Make some of the key highlighting points bold in the report.
        
-    Use clear, easy-to-understand language and avoid complex medical jargon. Make sure the report is factual and actionable.
+    Use clear, easy-to-understand language and avoid complex medical jargon. Make sure the report is factual 
+    and actionable.
     Make the report interactive by providing the predictions, probability, predict potential future ailments and 
     provide preventive required measures to take care of their health.
     
